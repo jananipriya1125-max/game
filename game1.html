@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Car Driving Game</title>
+  <style>
+    body { margin: 0; }
+    canvas { background: #333; display: block; margin: auto; }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Car setup
+    let car = { x: 375, y: 500, width: 100, height: 150 };
+    let carImg = new Image();
+    carImg.src = "car.png"; // Replace with Thar or Rolls-Royce PNG
+
+    // Road background
+    let roadImg = new Image();
+    roadImg.src = "road.png"; // Replace with a road texture image
+    let roadY = 0;
+
+    // Obstacles
+    let damages = [];
+    let score = 0;
+
+    function createDamage() {
+      damages.push({
+        x: Math.random() * (canvas.width - 60),
+        y: -20,
+        width: 60,
+        height: 20,
+        speed: 6
+      });
+    }
+
+    function drawRoad() {
+      ctx.drawImage(roadImg, 0, roadY, canvas.width, canvas.height);
+      ctx.drawImage(roadImg, 0, roadY - canvas.height, canvas.width, canvas.height);
+
+      roadY += 5;
+      if (roadY >= canvas.height) roadY = 0;
+    }
+
+    function drawCar() {
+      ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
+    }
+
+    function drawDamage() {
+      ctx.fillStyle = "red";
+      damages.forEach(d => ctx.fillRect(d.x, d.y, d.width, d.height));
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawRoad();
+      drawCar();
+      drawDamage();
+
+      damages.forEach(d => d.y += d.speed);
+
+      damages.forEach(d => {
+        if (
+          car.x < d.x + d.width &&
+          car.x + car.width > d.x &&
+          car.y < d.y + d.height &&
+          car.y + car.height > d.y
+        ) {
+          alert("Game Over! Final Score: " + score);
+          document.location.reload();
+        }
+      });
+
+      damages = damages.filter(d => d.y < canvas.height);
+
+      score++;
+      ctx.fillStyle = "yellow";
+      ctx.font = "20px Arial";
+      ctx.fillText("Score: " + score, 10, 20);
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft" && car.x > 0) car.x -= 20;
+      if (e.key === "ArrowRight" && car.x < canvas.width - car.width) car.x += 20;
+    });
+
+    setInterval(update, 50);
+    setInterval(createDamage, 1500);
+  </script>
+</body>
+</html>
